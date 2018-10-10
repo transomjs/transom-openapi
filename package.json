@@ -40,7 +40,8 @@
     "sinon": "^6.3.4"
   },
   "peerDependencies": {
-    "@transomjs/transom-core": "^1.0.8"
+    "@transomjs/transom-core": "^1.0.8",
+    "@transomjs/transom-scaffold": "^1.2.3"
   },
   "dependencies": {
     "debug": "^4.0.1",

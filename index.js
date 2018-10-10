@@ -2,7 +2,6 @@
 const debug = require('debug')('transom:openapi');
 
 function TransomOpenApi() {
-	let theServer;
 	let regKey;
 	const routes = [];
 	const schemas = {};
@@ -39,11 +38,11 @@ function TransomOpenApi() {
 		return openApiData;
 	}
 
-	this.buildPaths = function (openApiData) {
+	this.buildPaths = function (server, openApiData) {
 		routes.map((opts) => {
 			if (openApiData.servers.length === 0) {
 				openApiData.servers = [{
-					url: theServer.url
+					url: server.url
 				}];
 			}
 
@@ -118,11 +117,9 @@ function TransomOpenApi() {
 		return new Promise((resolve, reject) => {
 			options = options || {};
 			regKey = options.registryKey || 'transomOpenApi';
-			theServer = server;
 
 			const openapiConfig = server.registry.get('transom-config.definition.openapi', {});
 			openapiConfig.info = openapiConfig.info || {};
-			const outputPath = openapiConfig.outputPath || '/swagger.json';
 
 			const openApiData = {};
 			openApiData.openapi = openapiConfig.version || "3.0.0";
@@ -134,27 +131,58 @@ function TransomOpenApi() {
 			debug("Adding TransomOpenApi data to the registry as:", regKey);
 			server.registry.set(regKey, openApiData);
 
-			server.on('transom.route.get', this.createEventListener(theServer, 'get'));
-			server.on('transom.route.post', this.createEventListener(theServer, 'post'));
-			server.on('transom.route.put', this.createEventListener(theServer, 'put'));
-			server.on('transom.route.patch', this.createEventListener(theServer, 'patch'));
-			server.on('transom.route.del', this.createEventListener(theServer, 'delete'));
-
-			// Add a route to fetch the data as JSON.
-			server.get({
-				path: outputPath
-			}, (req, res, next) => {
-				let openApiData = server.registry.get(regKey);
-				// Only rebuild the openapi document if we've added paths!
-				if (!openApiData.paths) {
-					openApiData = this.buildPaths(openApiData);
-					openApiData = this.buildComponents(openApiData);
-				}
-				res.json(openApiData);
-				next();
-			});
+			server.on('transom.route.get', this.createEventListener(server, 'get'));
+			server.on('transom.route.post', this.createEventListener(server, 'post'));
+			server.on('transom.route.put', this.createEventListener(server, 'put'));
+			server.on('transom.route.patch', this.createEventListener(server, 'patch'));
+			server.on('transom.route.del', this.createEventListener(server, 'delete'));
 
 			resolve();
+		});
+	}
+
+	this.preStart = function (server, options) {
+		const scaffoldHandler = server.registry.get(options.scaffoldRegistryKey || 'transomScaffold', {});
+		// Add a GET request to fetch the SwaggerUI at /docs/index.html.
+		if (scaffoldHandler.addStaticAssetRoute) {
+			const route = (options.staticRoute === false ? false : options.staticRoute) || {
+				path: '/docs/',
+				defaultAsset: 'index.html',
+				folder: '/node_modules/@transomjs/transom-openapi',
+				appendRequestPath: false
+			};
+			if (route) {
+				debug(`Adding GET '${route.path}${route.defaultAsset}' route to Swagger UI.`);
+				scaffoldHandler.addStaticAssetRoute(server, route);
+			}
+		}
+		// Add a 301 redirect to go from /docs to /docs/.
+		if (scaffoldHandler.addRedirectRoute) {
+			const route = (options.redirectRoute === false ? false : options.redirectRoute) || {
+				path: '/docs',
+				target: '/docs/'
+			};
+			if (route) {
+				debug(`Adding '${route.path}' redirect to '${route.target}' for the Swagger UI.`);
+				scaffoldHandler.addRedirectRoute(server, route);
+			}
+		}
+
+		// Add a route to fetch the data as JSON.
+		const openapiConfig = server.registry.get('transom-config.definition.openapi', {});
+		const outputPath = openapiConfig.outputPath || '/swagger.json';
+		debug(`Adding GET '${outputPath}' route to the Swagger output file.`);
+		server.get({
+			path: outputPath
+		}, (req, res, next) => {
+			let openApiData = server.registry.get(regKey);
+			// Only rebuild the openapi document if we've added paths!
+			if (!openApiData.paths) {
+				openApiData = this.buildPaths(server, openApiData);
+				openApiData = this.buildComponents(openApiData);
+			}
+			res.json(openApiData);
+			next();
 		});
 	}
 }
