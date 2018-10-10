@@ -1,5 +1,5 @@
 # transom-openapi
-Add OpenApi support to server-side Transom APIs.
+Add live documentation to your server-side Transomjs APIs with swagger.json and the Swagger UI.
 
 [![Build Status](https://travis-ci.org/transomjs/transom-openapi.svg?branch=master)](https://travis-ci.org/transomjs/transom-openapi)
 
@@ -17,5 +17,6 @@ const transomOpenApi = require('@transomjs/transom-openapi');
 
 const transom = new Transom();
 
+// Configuration is completely optional
 transom.configure(transomOpenApi, {});
 ```

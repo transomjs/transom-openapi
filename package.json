@@ -1,7 +1,7 @@
 {
   "name": "@transomjs/transom-openapi",
-  "version": "1.0.3",
-  "description": "Add OpenApi support to server-side Transom APIs",
+  "version": "1.0.0",
+  "description": "Add OpenAPI and Swagger support to server-side Transom APIs",
   "main": "index.js",
   "scripts": {
     "deploy": "np",
@@ -16,8 +16,8 @@
     "url": "git+https://github.com/transomjs/transom-openapi.git"
   },
   "keywords": [
-    "graceful",
-    "shutdown"
+    "openapi",
+    "swagger"
   ],
   "author": "Mark Voorberg <mark@binaryops.ca>",
   "license": "MIT",
@@ -43,6 +43,7 @@
     "@transomjs/transom-core": "^1.0.8"
   },
   "dependencies": {
-    "debug": "^4.0.1"
+    "debug": "^4.0.1",
+    "swagger-ui-dist": "^3.19.3"
   }
 }
