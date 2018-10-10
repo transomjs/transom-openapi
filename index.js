@@ -155,7 +155,15 @@ function TransomOpenApi() {
 				debug(`Adding GET '${route.path}${route.defaultAsset}' route to Swagger UI.`);
 				scaffoldHandler.addStaticAssetRoute(server, route);
 			}
+			const swaggerAssets = {
+				path: '/swagger-ui-dist/*',
+				folder: '/node_modules',
+				appendRequestPath: true
+			};
+			debug(`Adding GET '${swaggerAssets.folder}${swaggerAssets.path}' route to Swagger UI assets.`);
+			scaffoldHandler.addStaticAssetRoute(server, swaggerAssets);
 		}
+
 		// Add a 301 redirect to go from /docs to /docs/.
 		if (scaffoldHandler.addRedirectRoute) {
 			const route = (options.redirectRoute === false ? false : options.redirectRoute) || {
