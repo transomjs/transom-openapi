@@ -7,7 +7,7 @@ Add live documentation to your server-side Transomjs APIs with swagger.json and 
 ## Installation
 
 ```bash
-$ npm install transom-openapi
+$ npm install @transomjs/transom-openapi
 ```
 
 ## Usage
@@ -17,6 +17,5 @@ const transomOpenApi = require('@transomjs/transom-openapi');
 
 const transom = new Transom();
 
-// Configuration is completely optional
-transom.configure(transomOpenApi, {});
+transom.configure(transomOpenApi); // That's it!
 ```
