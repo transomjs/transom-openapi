@@ -142,7 +142,14 @@ function TransomOpenApi() {
 	}
 
 	this.preStart = function (server, options) {
-		const scaffoldHandler = server.registry.get(options.scaffoldRegistryKey || 'transomScaffold', {});
+
+		const scaffoldKey = options.scaffoldRegistryKey || 'transomScaffold';
+		const hasScaffold = server.registry.has(scaffoldKey);
+		if (!hasScaffold) {
+			debug(`TransomOpenApi is unable to setup the Swagger UI, '${scaffoldKey}' not found.`);
+		}
+		const scaffoldHandler = server.registry.get(scaffoldKey, {});
+
 		// Add a GET request to fetch the SwaggerUI at /docs/index.html.
 		if (scaffoldHandler.addStaticAssetRoute) {
 			const route = (options.staticRoute === false ? false : options.staticRoute) || {
@@ -162,6 +169,8 @@ function TransomOpenApi() {
 			};
 			debug(`Adding GET '${swaggerAssets.folder}${swaggerAssets.path}' route to Swagger UI assets.`);
 			scaffoldHandler.addStaticAssetRoute(server, swaggerAssets);
+		} else {
+			debug(`Unable to create static route to the Swagger UI.`);
 		}
 
 		// Add a 301 redirect to go from /docs to /docs/.
@@ -174,6 +183,8 @@ function TransomOpenApi() {
 				debug(`Adding '${route.path}' redirect to '${route.target}' for the Swagger UI.`);
 				scaffoldHandler.addRedirectRoute(server, route);
 			}
+		} else {
+			debug(`Unable to create redirect route for the Swagger UI.`);
 		}
 
 		// Add a route to fetch the data as JSON.
