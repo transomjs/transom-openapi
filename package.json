@@ -45,6 +45,6 @@
   },
   "dependencies": {
     "debug": "^4.0.1",
-    "swagger-ui-dist": "^3.19.3"
+    "swagger-ui-dist": "^4.1.3"
   }
 }
